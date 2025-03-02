@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen de Contabilidad de Costos</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
+        <h1 class="text-xl font-bold mb-4">Examen de Contabilidad de Costos</h1>
+        <div id="quiz"></div>
+        <button id="submit" class="bg-blue-500 text-white px-4 py-2 rounded mt-4">Enviar Respuestas</button>
+        <div id="result" class="mt-4 font-bold"></div>
+        <canvas id="scoreChart" class="mt-4"></canvas>
+        <button id="retry" class="hidden bg-green-500 text-white px-4 py-2 rounded mt-4">Reintentar</button>
+    </div>
+
+    <script>
+        const questions = [
+            { "pregunta": "¿Cuál de los siguientes es un ejemplo de costo directo de mano de obra?", "opciones": ["Salario del supervisor de planta", "Salario de los operarios de la línea de producción", "Salario del personal de limpieza de la fábrica"], "respuesta_correcta": "Salario de los operarios de la línea de producción" },
+            { "pregunta": "Un fabricante de muebles incurre en costos de alquiler de su planta. ¿Cómo se clasifica este costo?", "opciones": ["Costo variable", "Costo fijo", "Costo indirecto variable"], "respuesta_correcta": "Costo fijo" },
+            { "pregunta": "¿Cuál de los siguientes elementos no forma parte del costo de los productos vendidos (COGS)?", "opciones": ["Materia prima directa", "Gastos de publicidad", "Mano de obra directa"], "respuesta_correcta": "Gastos de publicidad" },
+            { "pregunta": "Si la variación de materiales es negativa, ¿qué significa esto?", "opciones": ["Se gastó menos material del presupuestado", "Se gastó más material del presupuestado", "El precio de la materia prima bajó"], "respuesta_correcta": "Se gastó más material del presupuestado" },
+            { "pregunta": "En la elaboración de un presupuesto maestro, ¿cuál es el primer presupuesto que debe prepararse?", "opciones": ["Presupuesto de producción", "Presupuesto de ventas", "Presupuesto de caja"], "respuesta_correcta": "Presupuesto de ventas" },
+            { "pregunta": "¿Cuál es la principal diferencia entre el costeo por órdenes de trabajo y el costeo por procesos?", "opciones": ["El costeo por órdenes de trabajo se usa para producción en masa, mientras que el costeo por procesos es para producción personalizada", "El costeo por órdenes de trabajo asigna costos específicamente a cada orden, mientras que el costeo por procesos acumula costos por departamento", "El costeo por órdenes de trabajo es más utilizado en empresas de manufactura continua"], "respuesta_correcta": "El costeo por órdenes de trabajo asigna costos específicamente a cada orden, mientras que el costeo por procesos acumula costos por departamento" },
+            { "pregunta": "Una empresa tiene costos fijos de $50,000 y un margen de contribución del 40%. ¿Cuántas unidades debe vender si el precio de venta por unidad es de $25?", "opciones": ["5,000 unidades", "10,000 unidades", "20,000 unidades"], "respuesta_correcta": "5,000 unidades" },
+            { "pregunta": "¿Cuál de los siguientes costos es un costo indirecto de fabricación?", "opciones": ["Materia prima", "Energía eléctrica de la planta", "Salario del operario"], "respuesta_correcta": "Energía eléctrica de la planta" },
+            { "pregunta": "El punto de equilibrio es el nivel de ventas en el que:", "opciones": ["Los ingresos totales son iguales a los costos totales", "Los ingresos superan los costos totales", "Los costos fijos son nulos"], "respuesta_correcta": "Los ingresos totales son iguales a los costos totales" },
+            { "pregunta": "¿Cuál de los siguientes métodos se usa en costeo basado en actividades (ABC)?", "opciones": ["Asignación de costos por unidad producida", "Asignación de costos por actividad consumida", "Asignación de costos por volumen total de producción"], "respuesta_correcta": "Asignación de costos por actividad consumida" }
+        ];
+
+        const quizContainer = document.getElementById("quiz");
+        const submitButton = document.getElementById("submit");
+        const resultContainer = document.getElementById("result");
+        const retryButton = document.getElementById("retry");
+        const ctx = document.getElementById("scoreChart").getContext("2d");
+        
+        function loadQuiz() {
+            quizContainer.innerHTML = "";
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement("div");
+                questionDiv.classList.add("mb-4");
+                questionDiv.innerHTML = `<p class='font-semibold'>${index + 1}. ${q.pregunta}</p>`;
+                q.opciones.forEach(option => {
+                    questionDiv.innerHTML += `<label class='block'><input type='radio' name='q${index}' value='${option}' class='mr-2'>${option}</label>`;
+                });
+                quizContainer.appendChild(questionDiv);
+            });
+        }
+
+        function checkAnswers() {
+            let score = 0;
+            questions.forEach((q, index) => {
+                const selectedOption = document.querySelector(`input[name='q${index}']:checked`);
+                if (selectedOption && selectedOption.value === q.respuesta_correcta) {
+                    score++;
+                }
+            });
+            resultContainer.innerHTML = `Puntuación: ${score} / ${questions.length}`;
+            drawChart(score, questions.length - score);
+            retryButton.classList.remove("hidden");
+        }
+
+        function drawChart(correct, incorrect) {
+            new Chart(ctx, {
+                type: "doughnut",
+                data: {
+                    labels: ["Correctas", "Incorrectas"],
+                    datasets: [{
+                        data: [correct, incorrect],
+                        backgroundColor: ["#4CAF50", "#F44336"]
+                    }]
+                }
+            });
+        }
+
+        submitButton.addEventListener("click", checkAnswers);
+        retryButton.addEventListener("click", () => {
+            loadQuiz();
+            resultContainer.innerHTML = "";
+            retryButton.classList.add("hidden");
+        });
+
+        loadQuiz();
+    </script>
+</body>
+</html>
